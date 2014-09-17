@@ -151,7 +151,9 @@ void AES::Cipher(char *input, char *output) {
  *********************************************/
 void AES::Bm53Cipher(char *input, char *output) {
     int nLen = strlen(input);
-    char * newAlock = (char*) malloc(strlen(input) + (16 - nLen % 16) + 1);
+    int needMem = nLen + (16 - nLen % 16) + 1;
+    printf("needMem = %d\n", needMem);
+    char * newAlock = (char*) malloc(needMem);
     strcpy(newAlock, input);
     for (int n = 0; n < (16 - nLen % 16); n++) {
         newAlock[nLen + n] = (16 - nLen % 16);

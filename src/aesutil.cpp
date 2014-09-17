@@ -20,29 +20,91 @@ int main(int argc, char *argv[])
     return 0;
 }
 */
+unsigned char key[] = {'1', '1', '1', '2', '2', '2', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+AES aes(key);
+int cipher_file(const char *srcFile, const char *dstFile);
+int incipher_file(const char *srcFile, const char *dstFile);
+
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc < 3) {
         printf("Not a correct args\n");
         return -1;
     }
     bool cipher = false;
-    unsigned char key[] = {'1', '1', '1', '2', '2', '2', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
     char result[1024];
     memset(result, 0, sizeof(result));
-    AES aes(key);
     if (strcmp(argv[1], "-c") == 0) { // Cipher
-        aes.Bm53Cipher(argv[2], result);
+        aes.Cipher(argv[2], result);
         cipher = true;
     } else if (strcmp(argv[1], "-i") == 0) { // InvCipher
-        aes.Bm53InvCipher(argv[2], result);
+        aes.InvCipher(argv[2], result);
         cipher = false;
-    } else {
-        printf("Not a correct args\n");
+    } else if (strcmp(argv[1], "-if") == 0) {
+        printf("inciper file\n");
+        incipher_file(argv[2], argv[3]);
+        return (-1);
+    } else if (strcmp(argv[1], "-cf") == 0) {
+        printf("ciper file\n");
+        cipher_file(argv[2], argv[3]);
         return (-1);
     }
+    printf("srcLen = %d, dstLen = %d\n", strlen(argv[2]), strlen(result));
     printf("The %s result : %s\n", cipher ? "cipher" : "invcipher", result);
 }
 
-int cipher(char *srcFile, char *dstFile) {
+int cipher_file(const char *srcFile, const char *dstFile) {
+
+    FILE *fpsrc = NULL;
+    FILE *fpdst = NULL;
+    if ((fpsrc = fopen(srcFile, "r")) == NULL) {
+        return -1;
+    }
+
+    if ((fpdst = fopen(dstFile, "w")) == NULL) {
+        return -2;
+    }
+    char src[1024 + 1];
+    // char result[1024 * 2 + 33];
+    char *result = NULL;
+    size_t read = -1;
+    memset(src, 0, sizeof(src));
+    while ((read = fread(src, 1, sizeof(src) - 1, fpsrc)) > 0) {
+        src[read] = 0;
+        printf("read : %d\n", read);
+        memset(result, 0, sizeof(result));
+        fwrite(result, 1, strlen(result), fpdst);
+        memset(src, 0, sizeof(src));
+    }
+    fclose(fpsrc);
+    fclose(fpdst);
     return 0;
 }
+
+int incipher_file(const char *srcFile, const char *dstFile) {
+
+    FILE *fpsrc = NULL;
+    FILE *fpdst = NULL;
+    if ((fpsrc = fopen(srcFile, "r")) == NULL) {
+        return -1;
+    }
+
+    if ((fpdst = fopen(dstFile, "w")) == NULL) {
+        return -2;
+    }
+    char src[1024 + 1];
+    char result[1024 + 1];
+    size_t read = -1;
+    memset(src, 0, sizeof(src));
+    while ((read = fread(src, 1, sizeof(src) - 1, fpsrc)) > 0) {
+        src[read] = 0;
+        printf("read : %d\n", read);
+        memset(result, 0, sizeof(result));
+        aes.InvCipher(src, result);
+        fwrite(result, 1, strlen(result), fpdst);
+        memset(src, 0, sizeof(src));
+    }
+    fclose(fpsrc);
+    fclose(fpdst);
+    return 0;
+}
+
