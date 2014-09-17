@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 */
 unsigned char key[] = {'1', '1', '1', '2', '2', '2', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 AES aes(key);
-int cipher_file(const char *srcFile, const char *dstFile);
-int incipher_file(const char *srcFile, const char *dstFile);
+int cipher_file(const char *intput, const char *output);
+int incipher_file(const char *intput, const char *output);
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -52,15 +52,15 @@ int main(int argc, char *argv[]) {
     printf("The %s result : %s\n", cipher ? "cipher" : "invcipher", result);
 }
 
-int cipher_file(const char *srcFile, const char *dstFile) {
+int cipher_file(const char *intput, const char *output) {
 
     FILE *fpsrc = NULL;
     FILE *fpdst = NULL;
-    if ((fpsrc = fopen(srcFile, "r")) == NULL) {
+    if ((fpsrc = fopen(intput, "r")) == NULL) {
         return -1;
     }
 
-    if ((fpdst = fopen(dstFile, "w")) == NULL) {
+    if ((fpdst = fopen(output, "w")) == NULL) {
         return -2;
     }
     char src[1024 + 1];
@@ -71,9 +71,8 @@ int cipher_file(const char *srcFile, const char *dstFile) {
         src[read] = 0;
         memset(result, 0, sizeof(result));
         aes.Cipher(src, result);
-        int outlen = strlen(result);
-        printf("read : %d, outlen = %d\n", read, outlen);
-        fwrite(result, 1, outlen, fpdst);
+        //aes.customCipher(src, result);
+        fwrite(result, 1, strlen(result), fpdst);
         memset(src, 0, sizeof(src));
     }
     fclose(fpsrc);
@@ -81,15 +80,15 @@ int cipher_file(const char *srcFile, const char *dstFile) {
     return 0;
 }
 
-int incipher_file(const char *srcFile, const char *dstFile) {
+int incipher_file(const char *intput, const char *output) {
 
     FILE *fpsrc = NULL;
     FILE *fpdst = NULL;
-    if ((fpsrc = fopen(srcFile, "r")) == NULL) {
+    if ((fpsrc = fopen(intput, "r")) == NULL) {
         return -1;
     }
 
-    if ((fpdst = fopen(dstFile, "w")) == NULL) {
+    if ((fpdst = fopen(output, "w")) == NULL) {
         return -2;
     }
     char src[2048 + 1];
@@ -100,8 +99,7 @@ int incipher_file(const char *srcFile, const char *dstFile) {
         src[read] = 0;
         memset(result, 0, sizeof(result));
         aes.InvCipher(src, result);
-        int outlen = strlen(result);
-        printf("read : %d, outlen = %d\n", read, outlen);
+        //aes.customIncipher(src, result, sizeof(result));
         fwrite(result, 1, strlen(result), fpdst);
         memset(src, 0, sizeof(src));
     }
@@ -109,4 +107,3 @@ int incipher_file(const char *srcFile, const char *dstFile) {
     fclose(fpdst);
     return 0;
 }
-

@@ -42,7 +42,7 @@ ifeq ($(strip $(OBJECT)),)
 OBJECT := $(LIBRARY)
 endif
 LOCAL_OUT_FILE  := $(LOCAL_OUT_DIR)/$(LOCAL_LIB_DIR)/$(OBJECT)
-SHARED_OPTION := -fPIC
+SHARED_OPTION := -fPIC -g
 else
 ifeq ($(strip $(OBJECT)),)
 OBJECT := $(EXECUTABLE)
@@ -76,8 +76,7 @@ define translate-host-o-to-executable
 	@mkdir -p $(dir $@)
 	@$(GPP) -o $@ $(LOCAL_CPP_OBJ_FILES) $(LOCAL_C_OBJ_FILES) $(SHARED_LIBRARIES) $(SHARED_LIBRARIES_DIR)
 	$(info Target Executable Object : $@)
-	@#ln -sf $@
-	@cp $@ $(OBJECT)
+	@ln -sf $@
 endef
 
 #generate shared lib file

@@ -22,6 +22,8 @@ public:
 
     // int Bm53Cipher(char *input, char *output);
     // void Bm53InvCipher(char *inut, char *output, int len);
+    int customCipher(const char *input, char *output);
+    int customIncipher(const char *input, char *output, int outlen);
 
     unsigned char* Cipher(unsigned char* input);
     unsigned char* InvCipher(unsigned char* input);

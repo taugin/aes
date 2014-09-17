@@ -203,6 +203,65 @@ void AES::Bm53InvCipher(char *input, char *output, int len) {
     }
 }*/
 
+int AES::customCipher(const char *input, char *output) {
+    int nLen = strlen(input);
+    int realMem = nLen + (16 - nLen % 16);
+    int needMem = realMem + 1;
+    printf("needMem = %d\n", needMem);
+    char * newAlock = (char*) malloc(needMem);
+    memset(newAlock, 0, needMem);
+    strcpy(newAlock, input);
+    for (int n = 0; n < (16 - nLen % 16); n++) {
+        newAlock[nLen + n] = (16 - nLen % 16);
+    }
+    newAlock[realMem + 1] = 0;
+    int i = 0, j = 0;
+    char block[16], e_block[32];
+    while (newAlock[i] != '\0') {
+        memcpy(block, newAlock + i, 16);
+        Cipher(block, e_block);
+        memcpy(output + j, e_block, 32);
+        i += 16;
+        j += 32;
+    }
+    output[j] = '\0';
+    free(newAlock);
+    return 0;
+}
+
+int AES::customIncipher(const char *input, char *output, int outlen) {
+    int uinput_len = strlen(input) / 2;
+    unsigned char *uch_input = (unsigned char *) malloc(uinput_len);
+    unsigned char *uch_output = (unsigned char *) malloc(outlen);
+    memset(uch_input, 0, uinput_len);
+    memset(uch_output, 0, outlen);
+    hexToUChar(input, uch_input);
+    int nBuf = 0;
+    unsigned char ublock[16];
+    int n = strlen(input);
+    while (nBuf < uinput_len - 17) {
+        memcpy(ublock, uch_input + nBuf, 16);
+        InvCipher(ublock);
+        memcpy(uch_output + nBuf, ublock, 16);
+        nBuf += 16;
+    }
+    uch_output[nBuf] = 0;
+    printf("n = %d, uinput_len = %d, uch_output_len = %d, nBuf = %d\n", n, uinput_len, strlen((char *)uch_output), nBuf);
+    ucharToStr(uch_output, output);
+    int nLen = outlen;
+    for (n = nLen - 1; n >= nLen - 16; n--) {
+        if (1 <= output[n] && 16 >= output[n]) {
+            output[n] = 0;
+        } else {
+            break;
+        }
+    }
+    free(uch_input);
+    free(uch_output);
+    printf("%s", output);
+    return 0;
+}
+
 unsigned char* AES::Cipher(unsigned char* input) {
     unsigned char state[4][4];
     int i, r, c;
@@ -289,9 +348,7 @@ unsigned char* AES::InvCipher(unsigned char* input)
         for (c = 0; c < 4; c++)
 
         {
-
             input[c * 4 + r] = state[r][c];
-
         }
 
     }
@@ -693,9 +750,7 @@ int AES::getUCharLen(const unsigned char *uch)
 }
 
 int AES::ucharToHex(const unsigned char *uch, char *hex)
-
 {
-
     int high, low;
 
     int tmp = 0;
@@ -737,7 +792,6 @@ int AES::ucharToHex(const unsigned char *uch, char *hex)
 int AES::hexToUChar(const char *hex, unsigned char *uch)
 
 {
-
     int high, low;
 
     int tmp = 0;
@@ -879,121 +933,61 @@ int AES::strToHex(const char *ch, char *hex)
 }
 
 int AES::hexToStr(const char *hex, char *ch)
-
 {
-
     int high, low;
-
     int tmp = 0;
-
     if (hex == NULL || ch == NULL) {
-
         return -1;
-
     }
-
     if (strlen(hex) % 2 == 1) {
-
         return -2;
-
     }
-
     while (*hex) {
-
         high = ascillToValue(*hex);
-
         if (high < 0) {
-
             *ch = '\0';
-
             return -3;
-
         }
-
-        hex++; //ָ���ƶ�����һ���ַ���
-
-        low = ascillToValue(*hex);
-
-        if (low < 0) {
-
-            *ch = '\0';
-
-            return -3;
-
-        }
-
-        tmp = (high << 4) + low;
-
-        *ch++ = (char) tmp;
-
         hex++;
-
+        low = ascillToValue(*hex);
+        if (low < 0) {
+            *ch = '\0';
+            return -3;
+        }
+        tmp = (high << 4) + low;
+        *ch++ = (char) tmp;
+        hex++;
     }
-
     *ch = '\0';
-
     return 0;
-
 }
 
 int AES::ascillToValue(const char ch) {
-
     int result = 0;
 
-    //��ȡ16���Ƶĸ��ֽ�λ���
-
     if (ch >= '0' && ch <= '9') {
-
         result = (int) (ch - '0');
-
-    }
-
-    else if (ch >= 'a' && ch <= 'z') {
-
+    } else if (ch >= 'a' && ch <= 'z') {
         result = (int) (ch - 'a') + 10;
-
     }
-
     else if (ch >= 'A' && ch <= 'Z') {
-
         result = (int) (ch - 'A') + 10;
-
-    }
-
-    else {
-
+    } else {
         result = -1;
-
     }
-
     return result;
-
 }
 
 char AES::valueToHexCh(const int value)
-
 {
-
     char result = '\0';
-
     if (value >= 0 && value <= 9) {
-
-        result = (char) (value + 48); //48Ϊascii����ġ�0���ַ����ֵ
-
-    }
-
-    else if (value >= 10 && value <= 15) {
-
-        result = (char) (value - 10 + 65); //��ȥ10���ҳ�����16���Ƶ�ƫ������65Ϊascii��'A'���ַ����ֵ
-
-    }
-
-    else {
-
+        result = (char) (value + 48);
+    } else if (value >= 10 && value <= 15) {
+        result = (char) (value - 10 + 65);
+    } else {
         ;
-
     }
-
     return result;
 }
 
