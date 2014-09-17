@@ -142,14 +142,8 @@ void AES::Cipher(char *input, char *output) {
     ucharToHex(uch_input, output);
 }
 
-/*********************************************
- * ������  AES::Bm53Cipher
- * ������    ����ĵ�����
- * @����   char *input
- * @����   char *output
- * @����ֵ�� void
- *********************************************/
-void AES::Bm53Cipher(char *input, char *output) {
+/*
+int AES::Bm53Cipher(char *input, char *output) {
     int nLen = strlen(input);
     int needMem = nLen + (16 - nLen % 16) + 1;
     printf("needMem = %d\n", needMem);
@@ -168,9 +162,11 @@ void AES::Bm53Cipher(char *input, char *output) {
         i += 16;
         j += 32;
     }
+    printf("j = %d\n", j);
     output[j] = '\0';
     free(newAlock);
-}
+    return j-1;
+}*/
 
 void AES::InvCipher(char *input, char *output) {
     unsigned char uch_input[1024];
@@ -178,29 +174,25 @@ void AES::InvCipher(char *input, char *output) {
     InvCipher(uch_input);
     ucharToStr(uch_input, output);
 }
-/*********************************************
- * ������  AES::Bm53InvCipher
- * ������    ��������ֽ���
- * @����   char *input 16��������
- * @����   char *output ԭ��
- * @����ֵ�� void
- *********************************************/
-void AES::Bm53InvCipher(char *input, char *output) {
+/*
+void AES::Bm53InvCipher(char *input, char *output, int len) {
     unsigned char *uch_input = (unsigned char *) malloc(strlen(input) / 2);
-    unsigned char *uch_output = (unsigned char *) malloc(strlen(output));
+    unsigned char *uch_output = (unsigned char *) malloc(len);
     hexToUChar(input, uch_input);
     int nBuf = 0;
     unsigned char ublock[16];
     int n = strlen(input);
+    printf("n = %d\n", n);
     while (nBuf < (int) strlen(input) / 2) {
         memcpy(ublock, uch_input + nBuf, 16);
         InvCipher(ublock);
         memcpy(uch_output + nBuf, ublock, 16);
         nBuf += 16;
     }
-    uch_output[nBuf] = 0; //����ַ�
+    uch_output[nBuf] = 0;
     ucharToStr(uch_output, output);
-    //�޳����ڲ���16�ֽڵ��ַ�
+    printf("output : %s\n", output);
+
     int nLen = strlen(output);
     for (n = nLen - 1; n >= nLen - 16; n--) {
         if (1 <= output[n] && 16 >= output[n]) {
@@ -209,7 +201,7 @@ void AES::Bm53InvCipher(char *input, char *output) {
             break;
         }
     }
-}
+}*/
 
 unsigned char* AES::Cipher(unsigned char* input) {
     unsigned char state[4][4];

@@ -64,15 +64,16 @@ int cipher_file(const char *srcFile, const char *dstFile) {
         return -2;
     }
     char src[1024 + 1];
-    // char result[1024 * 2 + 33];
-    char *result = NULL;
+    char result[2048 + 1];
     size_t read = -1;
     memset(src, 0, sizeof(src));
     while ((read = fread(src, 1, sizeof(src) - 1, fpsrc)) > 0) {
         src[read] = 0;
-        printf("read : %d\n", read);
         memset(result, 0, sizeof(result));
-        fwrite(result, 1, strlen(result), fpdst);
+        aes.Cipher(src, result);
+        int outlen = strlen(result);
+        printf("read : %d, outlen = %d\n", read, outlen);
+        fwrite(result, 1, outlen, fpdst);
         memset(src, 0, sizeof(src));
     }
     fclose(fpsrc);
@@ -91,15 +92,16 @@ int incipher_file(const char *srcFile, const char *dstFile) {
     if ((fpdst = fopen(dstFile, "w")) == NULL) {
         return -2;
     }
-    char src[1024 + 1];
+    char src[2048 + 1];
     char result[1024 + 1];
     size_t read = -1;
     memset(src, 0, sizeof(src));
     while ((read = fread(src, 1, sizeof(src) - 1, fpsrc)) > 0) {
         src[read] = 0;
-        printf("read : %d\n", read);
         memset(result, 0, sizeof(result));
         aes.InvCipher(src, result);
+        int outlen = strlen(result);
+        printf("read : %d, outlen = %d\n", read, outlen);
         fwrite(result, 1, strlen(result), fpdst);
         memset(src, 0, sizeof(src));
     }

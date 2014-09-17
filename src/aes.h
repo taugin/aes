@@ -20,8 +20,8 @@ public:
 
     virtual ~AES();
 
-    void Bm53Cipher(char *input, char *output);
-    void Bm53InvCipher(char *inut, char *output);
+    // int Bm53Cipher(char *input, char *output);
+    // void Bm53InvCipher(char *inut, char *output, int len);
 
     unsigned char* Cipher(unsigned char* input);
     unsigned char* InvCipher(unsigned char* input);
